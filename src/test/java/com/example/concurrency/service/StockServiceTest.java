@@ -3,6 +3,7 @@ package com.example.concurrency.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.example.concurrency.domain.Stock;
+import com.example.concurrency.facade.OptimisticLockStockFacade;
 import com.example.concurrency.repository.StockRepository;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -18,6 +19,9 @@ class StockServiceTest {
 
     @Autowired
     private StockService stockService;
+
+    @Autowired
+    private OptimisticLockStockFacade optimisticLockStockFacade;
 
     @Autowired
     private StockRepository stockRepository;
@@ -79,6 +83,31 @@ class StockServiceTest {
             executorService.submit(() -> {
                 try {
                     stockService.decreaseWithPessimisticLock(1L, 1L);
+                } finally {
+                    countDownLatch.countDown();
+                }
+            });
+        }
+
+        countDownLatch.await();
+
+        Stock stock = stockRepository.findById(1L).orElseThrow();
+
+        assertEquals(0L, stock.getQuantity());
+    }
+
+    @Test
+    void decrease_optimisticLock() throws InterruptedException {
+        int threadCount = 100;
+        ExecutorService executorService = Executors.newFixedThreadPool(32);
+        CountDownLatch countDownLatch = new CountDownLatch(threadCount);
+
+        for (int i = 0; i < threadCount; i++) {
+            executorService.submit(() -> {
+                try {
+                    optimisticLockStockFacade.decreaseWithOptimisticLock(1L, 1L);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
                 } finally {
                     countDownLatch.countDown();
                 }
