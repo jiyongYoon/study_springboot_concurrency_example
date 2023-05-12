@@ -18,6 +18,7 @@ dependencies {
     implementation 'org.postgresql:postgresql:42.2.23'
     implementation 'mysql:mysql-connector-java'
     implementation 'org.springframework.boot:spring-boot-starter-test'
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 }
 
 tasks.named('test') {
