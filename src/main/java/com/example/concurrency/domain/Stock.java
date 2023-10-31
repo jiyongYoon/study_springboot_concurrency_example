@@ -17,7 +17,7 @@ public class Stock {
 
     private Long quantity;
 
-    @Version
+//    @Version
     private Long version;
 
     public Stock() {
@@ -38,5 +38,13 @@ public class Stock {
         }
 
         this.quantity = this.quantity - quantity;
+    }
+
+    public void increase(Long quantity) {
+        this.quantity = this.quantity + quantity;
+    }
+
+    public boolean isPossibleDecrease(Long quantity) {
+        return this.quantity - quantity >= 0;
     }
 }
